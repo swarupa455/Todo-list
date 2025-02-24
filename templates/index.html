@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f4f4f9, #e1f5fe);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2e7d32; /* Green color for heading */
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+
+        .filter-form {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-form input,
+        .filter-form select,
+        .filter-form button {
+            padding: 10px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .filter-form input {
+            width: 40%;
+        }
+
+        .filter-form select {
+            width: 30%;
+        }
+
+        .filter-form button {
+            width: 15%;
+            background-color: #4CAF50; /* Green background */
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .filter-form button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        .clear-btn {
+            background-color: #f44336; /* Red background */
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .clear-btn:hover {
+            background-color: #e53935; /* Darker red on hover */
+        }
+
+        .task-form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .task-form input,
+        .task-form textarea,
+        .task-form select {
+            width: 100%;
+            margin: 10px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .task-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50; /* Green background for button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .task-form button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        .tasks {
+            margin-top: 30px;
+        }
+
+        .task {
+            background: #e8f5e9; /* Light green background */
+            border-left: 5px solid #4CAF50;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+        .task:hover {
+            transform: scale(1.02);
+        }
+
+        .completed {
+            background-color: #c8e6c9; /* Lighter green for completed tasks */
+            text-decoration: line-through;
+            border-left-color: #388e3c;
+        }
+
+        .task-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .edit-form input,
+        .edit-form select,
+        .edit-form textarea {
+            width: calc(100% - 10px);
+            margin: 5px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .delete-btn, .edit-btn, .complete-btn, .save-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .edit-btn {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .complete-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-header h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .task-header p {
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+    <script>
+        function toggleEditForm(taskId) {
+            var form = document.getElementById('edit-form-' + taskId);
+            form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+        }
+
+        function clearFilters() {
+            document.querySelector('input[name="search"]').value = '';
+            document.querySelector('select[name="category"]').value = '';
+            document.querySelector('select[name="completed"]').value = '';
+            document.querySelector('form').submit();
+        }
+    </script>
+</head>
+<body>
+    <h1>Todo List</h1>
+
+    <!-- Search and Filter Form -->
+    <div class="filter-form">
+        <form action="{{ url_for('index') }}" method="GET">
+            <input type="text" name="search" placeholder="Search tasks..." value="{{ request.args.get('search', '') }}">
+            <select name="category">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+            </select>
+            <select name="completed">
+                <option value="">All Tasks</option>
+                <option value="True" {% if request.args.get('completed') == 'True' %}selected{% endif %}>Completed</option>
+                <option value="False" {% if request.args.get('completed') == 'False' %}selected{% endif %}>Incomplete</option>
+            </select>
+            <button type="submit">Filter</button>
+        </form>
+        <button class="clear-btn" onclick="clearFilters()">Clear Filters</button>
+    </div>
+
+    <div class="task-form">
+        <form action="{{ url_for('add_task_web') }}" method="POST">
+            <input type="text" name="title" placeholder="Task Title" required>
+            <textarea name="description" placeholder="Task Description"></textarea>
+            <select name="category">
+                {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Add Task</button>
+        </form>
+    </div>
+
+    <div class="tasks">
+        {% for task in tasks %}
+        <div class="task {% if task.completed %}completed{% endif %}">
+            <div class="task-header">
+                <h3>{{ task.title }}</h3>
+                <p><strong>Category:</strong> {{ task.category }}</p>
+            </div>
+            <p>{{ task.description }}</p>
+            <div class="task-actions">
+                {% if not task.completed %}
+                <a href="{{ url_for('complete_task_web', task_id=task.id) }}" class="complete-btn">Mark Complete</a>
+                {% endif %}
+                <button onclick="toggleEditForm('{{ task.id }}')" class="edit-btn">Edit</button>
+                <a href="{{ url_for('delete_task_web', task_id=task.id) }}" class="delete-btn">Delete</a>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="edit-form" id="edit-form-{{ task.id }}">
+                <form action="{{ url_for('edit_task_web', task_id=task.id) }}" method="POST">
+                    <input type="text" name="title" value="{{ task.title }}" required>
+                    <textarea name="description">{{ task.description }}</textarea>
+                    <select name="category">
+                        {% for category in categories %}
+                            <option value="{{ category }}" {% if category == task.category %}selected{% endif %}>{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="save-btn">Save Changes</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
